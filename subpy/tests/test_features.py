@@ -399,19 +399,19 @@ class TestToplevel(unittest.TestCase):
 
     def test_validator(self):
 
-        from subpy import validator, FeatureNotSupported
+        from subpy import validator, FullPython, FeatureNotSupported
         from subpy.features import ListComp, SetComp
 
         def comps():
             return [x**2 for x in range(25)]
 
-        my_excluded_subset = set([
+        my_features = FullPython - set([
             ListComp,
             SetComp,
         ])
 
         with self.assertRaises(FeatureNotSupported):
-            validator(comps)
+            validator(comps, features=my_features)
 
 tests.append(TestToplevel)
 

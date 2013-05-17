@@ -6,7 +6,12 @@ Subpy
 =====
 
 Subpy is a library for defining subsets of the Python language
-and querying ASTs for language-level properties.
+and querying ASTs for language-level properties that are
+specified as subsets of the language.
+
+It aims to provide library support for building *well-specified
+subsets* in contrast to the "anything the compiler can compile"
+model.
 
 Many projects aim to work with specific subsets of Python that
 are amenable to *static analysis* and *type inference*, subpy is
@@ -75,18 +80,19 @@ The ``validator`` command can be used to raise when unsupported
 features are detected in the given source.
 
 ```python
-from subpy import validator, FeatureNotSupported
+from subpy import validator, FullPython, FeatureNotSupported
 from subpy.features import ListComp, SetComp
 
 def comps():
     return [x**2 for x in range(25)]
 
-my_excluded_subset = set([
+my_features = FullPython - set([
     ListComp,
     SetComp,
 ])
 
-validator(comps)
+with self.assertRaises(FeatureNotSupported):
+    validator(comps, features=my_features)
 ```
 
 ```python
