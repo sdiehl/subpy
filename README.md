@@ -84,10 +84,7 @@ from subpy.features import ListComp, SetComp
 def comps():
     return [x**2 for x in range(25)]
 
-my_features = FullPython - set([
-    ListComp,
-    SetComp,
-])
+my_features = FullPython - { ListComp, SetComp }
 
 validator(comps, features=my_features)
 ```
