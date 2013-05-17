@@ -75,7 +75,9 @@ if ListComp not in features:
 ```
 
 The ``validator`` command can be used to raise when unsupported
-features are detected in the given source.
+features are detected in the given source. For example, we'll
+support the python feature set excluding list comprehensions and
+set comprehensions.
 
 ```python
 from subpy import validator, FullPython, FeatureNotSupported
