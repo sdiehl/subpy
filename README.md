@@ -10,7 +10,9 @@ and querying ASTs for language-level properties.
 
 Many projects aim to work with specific subsets of Python that
 are amenable to *static analysis* and *type inference*, subpy is
-simply a utility library for checking for subsets.
+simply a utility library for checking for subsets with the
+intention of providing more informative error reporting for
+end-users.
 
 Usage
 -----
@@ -35,7 +37,8 @@ feature is detected.
 ```
 
 Matching the feature codes with the keys in the dictionary we see
-the information this is telling us:
+the information this is telling us that in the ``io`` module in
+the standard library:
 
 * A *delete* is used on line 98.
 * A *class* is used on line 78, 81, 84, and 87.
@@ -91,6 +94,60 @@ validator(comps)
     return [x**2 for x in range(25)]
             ^
 subpy.validate.FeatureNotSupported: ListComp
+```
+
+Subpy is currently able to parse the entire standard library and
+can be used to query some interesting trivia facts.
+
+```python
+from subpy import detect
+from subpy.stdlib import libraries
+from subpy.features import Metaclasses, MInheritance, Exec
+
+print('Libraries with Multiple Inheritance and Metaclasses:')
+for lib in libraries:
+    mod = importlib.import_module(lib)
+    features = detect(mod)
+
+    if Metaclasses in features and MInheritance in features:
+        print(lib)
+
+```
+
+```
+Libraries with Multiple Inheritance and Metaclasses:
+io
+```
+
+Or to query for potentially unsafe code execution:
+
+```python
+print('Libraries with Exec')
+for lib in libraries:
+    mod = importlib.import_module(lib)
+    features = detect(mod)
+
+    if Exec in features:
+        print(lib)
+```
+
+```
+Libraries with Exec
+ihooks
+site
+cgi
+rexec
+Bastion
+imputil
+trace
+timeit
+cProfile
+doctest
+code
+bdb
+runpy
+profile
+collections
 ```
 
 Feature Codes
