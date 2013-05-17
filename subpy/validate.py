@@ -592,8 +592,7 @@ class Validator(PythonVisitor):
         line = self._source.splitlines()[node.lineno-1]
         lineno = node.lineno
         offset = node.col_offset
-        raise FeatureNotSupported('Unsupported Feature %s' % feature,
-            ('<stdin>', lineno, offset + 1, line))
+        raise FeatureNotSupported(feature, ('<stdin>', lineno, offset + 1, line))
 
 class Checker(PythonVisitor):
     """ Aggregate sites for features that don't conform to the

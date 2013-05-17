@@ -44,6 +44,7 @@ A example using the function level checker:
 
 ```python
 from subpy import checker
+from subpy.features import ListComp
 
 def comps():
     return [x**2 for x in range(25)]
@@ -56,7 +57,7 @@ features = checker(comps)
 if ListComp in features:
     print 'You used a list comprehension on lines %r' % (features[ListComp])
 
-features = checker(nocomps)
+features = checker(nocomp)
 
 if ListComp not in features:
     print 'You did not use any list comprehensions!'
@@ -82,7 +83,10 @@ validator(comps)
 ```
 
 ```python
-subpy.validate.FeatureNotSupported: Unsupported Feature: ListComp
+  File "<stdin>", line 2
+    return [x**2 for x in range(25)]
+            ^
+subpy.validate.FeatureNotSupported: ListComp
 ```
 
 Feature Codes
