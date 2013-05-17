@@ -1,3 +1,7 @@
+<p align="center" style="padding: 20px">
+<img src="https://raw.github.com/sdiehl/subpy/master/logo_sml.png">
+</p>
+
 Subpy
 =====
 
