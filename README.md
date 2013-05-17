@@ -89,8 +89,7 @@ my_features = FullPython - set([
     SetComp,
 ])
 
-with self.assertRaises(FeatureNotSupported):
-    validator(comps, features=my_features)
+validator(comps, features=my_features)
 ```
 
 ```python
