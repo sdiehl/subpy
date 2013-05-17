@@ -104,6 +104,8 @@ from subpy import detect
 from subpy.stdlib import libraries
 from subpy.features import Metaclasses, MInheritance, Exec
 
+import importlib
+
 print('Libraries with Multiple Inheritance and Metaclasses:')
 for lib in libraries:
     mod = importlib.import_module(lib)
