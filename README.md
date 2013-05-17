@@ -56,18 +56,18 @@ A example using the function level checker:
 from subpy import checker
 from subpy.features import ListComp
 
-def comps():
+def example1():
     return [x**2 for x in range(25)]
 
-def nocomp():
+def example2():
     return 'hello'
 
-features = checker(comps)
+features = checker(example1)
 
 if ListComp in features:
     print 'You used a list comprehension on lines %r' % (features[ListComp])
 
-features = checker(nocomp)
+features = checker(example2)
 
 if ListComp not in features:
     print 'You did not use any list comprehensions!'
@@ -83,12 +83,12 @@ set comprehensions.
 from subpy import validator, FullPython, FeatureNotSupported
 from subpy.features import ListComp, SetComp
 
-def comps():
+def example():
     return [x**2 for x in range(25)]
 
 my_features = FullPython - { ListComp, SetComp }
 
-validator(comps, features=my_features)
+validator(example, features=my_features)
 ```
 
 ```python
