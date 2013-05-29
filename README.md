@@ -7,9 +7,7 @@ Subpy
 
 Subpy is a library for defining subsets of the Python language
 and querying ASTs for language-level properties that are
-specified as sets of features. It aims to provide library support
-for building *well-specified subsets* and break out of the
-"anything the compiler can compile" model.
+specified as sets of features.
 
 Many projects aim to work with specific subsets of Python that
 are amenable to *static analysis* and *type inference*, subpy is
