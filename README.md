@@ -72,6 +72,17 @@ if ListComp not in features:
 
 ```
 
+Defining Subsets
+----------------
+
+For example if we want to exclude the use of *List Comprehensions*
+and *Set Comprehensions* we could define a subset of Python that
+excludes these features.
+
+```python
+MyPythonSubset = FullPython - { ListComp, SetComp }
+```
+
 The ``validator`` command can be used to raise when unsupported
 features are detected in the given source. For example, we'll
 support the python feature set excluding list comprehensions and
