@@ -11,8 +11,8 @@ specified as sets of features.
 
 Many projects aim to work with specific subsets of Python that
 are amenable to *static analysis* and *type inference*, subpy is
-simply a utility library for checking for subsets with the
-intention of providing more informative error reporting for
+simply a static analysis  library for checking for subsets with
+the intention of providing more informative error reporting for
 end-users.
 
 Usage
@@ -20,8 +20,8 @@ Usage
 
 The input to the ``checker`` can be either a Module, Function or
 source code as string. It returns a dictionary of lists keyed by
-the ``feature`` and the values with the line numbers where the
-feature is detected. 
+the ``feature`` enumeration code and the values with the line
+numbers where the feature is detected. 
 
 ```python
 >>> from subpy import checker
@@ -166,7 +166,8 @@ collections
 Feature Codes
 -------------
 
-Currently supported features are:
+Currently supported features are an enumeration with values given
+below:
 
 1. ImplicitCasts
 1. Generators
@@ -203,6 +204,22 @@ Currently supported features are:
 1. Printing
 1. Metaclasses
 
+Testing
+-------
+
+To test run:
+
+```bash
+$ python -m unittest discover subpy/tests
+```
+
+Copying
+-------
+
+The core logic is self-contained in ``features.py`` and
+``validate.py`` which will function as standalone modules without
+subpy package, which includes the test suite. There are no
+dependencies other than the standard library.
 
 License
 -------
