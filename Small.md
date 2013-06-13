@@ -103,6 +103,9 @@ Data Model
 - Unicode strings are immutable arrays of UTF-8 characters. The
   storage is compiler specific.
 
+The ``list`` constructor polymorphically lifts elements into
+singleton containers.
+
 ```
 list :: a -> [a]
 ```
@@ -120,7 +123,8 @@ The ``intern`` function is not supported.
 Length
 ------
 
-Implementation is compiler specific.
+The implementation of the ``len`` function is polymorphic and
+container specific.
 
 ```python
 len :: [a] -> int
@@ -148,7 +152,7 @@ System IO
 ---------
 
 ``file``, ``open`` and ``quit``, ``raw_input``, ``reload``,
-``help`` and ``input``.
+``help`` and ``input`` are not supported.
 
 ``print`` is optionally supported. The implementation is specific
 to the compiler. For compilers that do not choose to implement
@@ -172,7 +176,7 @@ iterators are not supported. The ``iter`` and ``next`` functions
 are not supported.
 
 ```
-for i in xrange(start, stop, step
+for i in xrange(start, stop, step)
     foo()
 ```
 
@@ -184,6 +188,10 @@ for (i = start; i < stop; i += step) {
     foo();
 }
 ```
+
+The value of ``i`` after the loop block follows the Python
+semantics and is set to the last value in the iterator instead of
+the C semantics.
 
 ``xrange`` and `range`` are lowered into the same constructs.
 
@@ -244,7 +252,7 @@ Builtins
 * iter           -  Not Supported  
 * len            -  Supported 
 * license        -  Not Supported     
-* list           -  Not Supported  
+* list           -  Supported  
 * locals         -  Not Supported    
 * long           -  Not Supported  
 * map            -  Supported 
@@ -539,7 +547,6 @@ module SmallPython
 
 ```
 
-
 Operators
 ---------
 
@@ -568,7 +575,16 @@ Operators
 - Gt       
 - GtE      
 
-Comparison operator chaining is supported.
+Comparison operator chaining is supported and is desugared into
+boolean conjunctions of the comparison operators.
+
+```
+(x > y > z)
+```
+
+```
+(x > y) and (y > z)
+```
 
 Smallpy explictly does not support the following operators.
 
@@ -577,15 +593,21 @@ Smallpy explictly does not support the following operators.
 - In
 - NotIn
 
+Division
+--------
+
+Division follows the Python semantics for distinction between
+``floordiv`` and ``truediv`` but operates over unboxed types
+with no error checking.
 
 Math Functions
 --------------
 
-abs
-cmp
-divmod
-pow
-round
+- abs
+- cmp
+- divmod
+- pow
+- round
 
 sorted
 
