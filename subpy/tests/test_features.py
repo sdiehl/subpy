@@ -46,7 +46,7 @@ class TestFeatureDetect(unittest.TestCase):
         def fn():
             x = 3
             def closure():
-                print x
+                print(x)
 
         self.has(f.Closures, fn)
 
@@ -78,7 +78,7 @@ class TestFeatureDetect(unittest.TestCase):
     def test_varargs2(self):
 
         def fn():
-            map(id, *xs)
+            list(map(id, *xs))
 
         self.has(f.VarArgs, fn)
 
@@ -247,7 +247,7 @@ class TestFeatureDetect(unittest.TestCase):
     def test_exec(self):
 
         def fn():
-            exec 'foo' in {}
+            exec('foo', {})
 
         self.has(f.Exec, fn)
 
@@ -329,7 +329,7 @@ class TestFeatureDetect(unittest.TestCase):
         def fn():
             for a in range(25):
                 pass
-            for a in xrange(25):
+            for a in range(25):
                 pass
 
         self.not_has(f.CustomIterators, fn)
@@ -337,15 +337,15 @@ class TestFeatureDetect(unittest.TestCase):
     def test_printing(self):
 
         def fn():
-            print 'hello world'
+            print('hello world')
 
         self.has(f.Printing, fn)
 
     def test_metaclass(self):
 
         def fn():
-            class Foo(object):
-                __metaclass__ = Bar
+            class Foo(object, metaclass=Bar):
+                pass
 
         self.has(f.Metaclasses, fn)
 
