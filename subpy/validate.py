@@ -190,19 +190,25 @@ class PythonVisitor(ast.NodeVisitor):
         args = list(map(self.visit, node.args))
         keywords = list(map(self.visit, node.keywords))
 
-        if node.starargs:
+        # Python 2.x - 3.4
+        if hasattr(node,"starargs") and node.starargs:
             ## Check for variadic arguments
             starargs = self.visit(node.starargs)
 
             if VarArgs not in self.features:
                 self.action(node, VarArgs)
 
-        if node.keywords or node.kwargs:
+        if (hasattr(node,'keywords') and node.keywords) or \
+            (hasattr(node,'kwargs') and node.kwargs):
             ## Check for keyword arguments
             kwargs = list(map(self.visit, node.keywords))
 
             if KeywordArgs not in self.features:
                 self.action(node, KeywordArgs)
+
+        # Python 3.5+
+        # TODO
+
 
     def visit_ClassDef(self, node):
 
