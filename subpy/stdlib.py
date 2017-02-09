@@ -28,6 +28,7 @@ def standard_library():
                    (pack not in jokes):
                     yield pack
 
+# Python 3.x, todo, this has changed
 libraries = [
      'ihooks',
      'quopri',
