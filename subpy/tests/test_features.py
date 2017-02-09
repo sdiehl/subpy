@@ -145,7 +145,7 @@ class TestFeatureDetect(unittest.TestCase):
 
         self.has(f.ChainComparison, fn)
 
-    def test_exceptiosn1(self):
+    def test_exceptions1(self):
 
         def fn():
             raise Exception
