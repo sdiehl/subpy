@@ -5,7 +5,7 @@ import inspect
 from textwrap import dedent
 from collections import deque, defaultdict
 
-from features import *
+from .features import *
 
 FullPython = set([
     ImplicitCasts,
@@ -75,7 +75,7 @@ class PythonVisitor(ast.NodeVisitor):
             source = dedent(inspect.getsource(source))
         if isinstance(source, types.LambdaType):
             source = dedent(inspect.getsource(source))
-        elif isinstance(source, (str, unicode)):
+        elif isinstance(source, str):
             source = source
         else:
             raise NotImplementedError
@@ -96,7 +96,7 @@ class PythonVisitor(ast.NodeVisitor):
 
     def visit_comprehension(self, node):
         if node.ifs:
-            ifs = map(self.visit, node.ifs)
+            ifs = list(map(self.visit, node.ifs))
         target = self.visit(node.target)
         iter = self.visit(node.iter)
 
@@ -172,7 +172,7 @@ class PythonVisitor(ast.NodeVisitor):
         pass
 
     def visit_BoolOp(self, node):
-        operands = map(self.visit, node.values)
+        operands = list(map(self.visit, node.values))
         operator = node.op.__class__
 
         ## Check for implicit coercions between numeric types
@@ -187,22 +187,28 @@ class PythonVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node):
         name = self.visit(node.func)
-        args = map(self.visit, node.args)
-        keywords = map(self.visit, node.keywords)
+        args = list(map(self.visit, node.args))
+        keywords = list(map(self.visit, node.keywords))
 
-        if node.starargs:
+        # Python 2.x - 3.4
+        if hasattr(node,"starargs") and node.starargs:
             ## Check for variadic arguments
             starargs = self.visit(node.starargs)
 
             if VarArgs not in self.features:
                 self.action(node, VarArgs)
 
-        if node.keywords or node.kwargs:
+        if (hasattr(node,'keywords') and node.keywords) or \
+            (hasattr(node,'kwargs') and node.kwargs):
             ## Check for keyword arguments
-            kwargs = map(self.visit, node.keywords)
+            kwargs = list(map(self.visit, node.keywords))
 
             if KeywordArgs not in self.features:
                 self.action(node, KeywordArgs)
+
+        # Python 3.5+
+        # TODO
+
 
     def visit_ClassDef(self, node):
 
@@ -210,7 +216,7 @@ class PythonVisitor(ast.NodeVisitor):
             self.action(node, Classes)
 
         if node.bases:
-            bases = map(self.visit, node.bases)
+            bases = list(map(self.visit, node.bases))
 
             ## Check for single inheritance
             if len(bases) >= 1 and Inheritance not in self.features:
@@ -221,7 +227,7 @@ class PythonVisitor(ast.NodeVisitor):
                 self.action(node, MInheritance)
 
         if node.decorator_list:
-            decorators = map(self.visit, node.decorator_list)
+            decorators = list(map(self.visit, node.decorator_list))
 
             ## Check for class decorators
             if decorators and ClassDecorators not in self.features:
@@ -229,7 +235,7 @@ class PythonVisitor(ast.NodeVisitor):
 
 
         self.scope.append(('class', node))
-        body = map(self.visit, node.body)
+        body = list(map(self.visit, node.body))
         self.scope.pop()
 
     def visit_Compare(self, node):
@@ -237,8 +243,8 @@ class PythonVisitor(ast.NodeVisitor):
         if len(node.comparators) > 1 and ChainComparison not in self.features:
             self.action(node, ChainComparison)
 
-        operands = map(self.visit, [node.left] + node.comparators)
-        operators = map(lambda op: op.__class__, node.ops)
+        operands = list(map(self.visit, [node.left] + node.comparators))
+        operators = [op.__class__ for op in node.ops]
 
     def visit_Continue(self, node):
         ## Check for continue
@@ -246,18 +252,18 @@ class PythonVisitor(ast.NodeVisitor):
             self.action(node, Continue)
 
     def visit_Delete(self, node):
-        target = map(self.visit, node.targets)
+        target = list(map(self.visit, node.targets))
         if DelVar not in self.features:
             self.action(node, DelVar)
 
     def visit_Dict(self, node):
-        keys = map(self.visit, node.keys)
-        values = map(self.visit, node.values)
+        keys = list(map(self.visit, node.keys))
+        values = list(map(self.visit, node.values))
 
     def visit_DictComp(self, node):
         key = self.visit(node.key)
         value = self.visit(node.value)
-        gens = map(self.visit, node.generators)
+        gens = list(map(self.visit, node.generators))
 
         ## Check for dictionary comprehensions
         if DictComp not in self.features:
@@ -267,7 +273,7 @@ class PythonVisitor(ast.NodeVisitor):
         pass
 
     def visit_ExtSlice(self, node):
-        map(self.visit, node.dims)
+        list(map(self.visit, node.dims))
 
     def visit_ExceptHandler(self, node):
 
@@ -275,7 +281,7 @@ class PythonVisitor(ast.NodeVisitor):
             name = node.name.id
         #if node.type:
             #type = node.type.id
-        body = map(self.visit, node.body)
+        body = list(map(self.visit, node.body))
 
         if Exceptions not in self.features:
             self.action(node, Exceptions)
@@ -297,8 +303,8 @@ class PythonVisitor(ast.NodeVisitor):
     def visit_For(self, node):
         target = self.visit(node.target)
         iter = self.visit(node.iter)
-        body = map(self.visit, node.body)
-        orelse = map(self.visit, node.orelse)
+        body = list(map(self.visit, node.body))
+        orelse = list(map(self.visit, node.orelse))
 
         ## Check for custom iterators
         if CustomIterators not in self.features:
@@ -319,7 +325,7 @@ class PythonVisitor(ast.NodeVisitor):
         self.check_arguments(node)
 
         if node.decorator_list:
-            decorators = map(self.visit, node.decorator_list)
+            decorators = list(map(self.visit, node.decorator_list))
 
             ## Check for class decorators
             if decorators and Decorators not in self.features:
@@ -345,7 +351,7 @@ class PythonVisitor(ast.NodeVisitor):
 
     def visit_GeneratorExp(self, node):
         self.visit(node.elt)
-        map(self.visit, node.generators)
+        list(map(self.visit, node.generators))
 
         ## Check for dictionary comprehensions
         if GeneratorExp not in self.features:
@@ -353,8 +359,8 @@ class PythonVisitor(ast.NodeVisitor):
 
     def visit_If(self, node):
         test = self.visit(node.test)
-        body = map(self.visit, node.body)
-        orelse = map(self.visit, node.orelse)
+        body = list(map(self.visit, node.body))
+        orelse = list(map(self.visit, node.orelse))
 
     def visit_IfExp(self, node):
         test = self.visit(node.test)
@@ -415,7 +421,7 @@ class PythonVisitor(ast.NodeVisitor):
         body = self.visit(node.body)
 
     def visit_List(self, node):
-        elts = map(self.visit, node.elts)
+        elts = list(map(self.visit, node.elts))
 
         ## Check for hetereogenous lists
         if node.elts and not HeteroList in self.features:
@@ -426,7 +432,7 @@ class PythonVisitor(ast.NodeVisitor):
 
     def visit_ListComp(self, node):
         elt = self.visit(node.elt)
-        gens = map(self.visit, node.generators)
+        gens = list(map(self.visit, node.generators))
 
         ## Check for list comprehensions
         if ListComp not in self.features:
@@ -439,7 +445,7 @@ class PythonVisitor(ast.NodeVisitor):
         pass
 
     def visit_Module(self, node):
-        body = map(self.visit, node.body)
+        body = list(map(self.visit, node.body))
 
     def visit_Pass(self, node):
         pass
@@ -452,7 +458,7 @@ class PythonVisitor(ast.NodeVisitor):
         if node.dest:
             dest = self.visit(node.dest)
 
-        values = map(self.visit, node.values)
+        values = list(map(self.visit, node.values))
 
     def visit_Raise(self, node):
         if node.type:
@@ -471,11 +477,11 @@ class PythonVisitor(ast.NodeVisitor):
             self.action(node, MultipleReturn)
 
     def visit_Set(self, node):
-        elts = map(self.visit, node.elts)
+        elts = list(map(self.visit, node.elts))
 
     def visit_SetComp(self, node):
         elt = self.visit(node.elt)
-        gens = map(self.visit, node.generators)
+        gens = list(map(self.visit, node.generators))
 
         ## Check for set comprehensions
         if SetComp not in self.features:
@@ -517,27 +523,27 @@ class PythonVisitor(ast.NodeVisitor):
             self.action(node, Ellipsi)
 
     def visit_TryExcept(self, node):
-        body = map(self.visit, node.body)
+        body = list(map(self.visit, node.body))
         if node.handlers:
-            handlers = map(self.visit, node.handlers)
+            handlers = list(map(self.visit, node.handlers))
 
         if node.orelse:
-            orelse = map(self.visit, node.orelse)
+            orelse = list(map(self.visit, node.orelse))
 
         ## Check for exceptions
         if Exceptions not in self.features:
             self.action(node, Exceptions)
 
     def visit_TryFinally(self, node):
-        body = map(self.visit, node.body)
-        finalbody = map(self.visit, node.finalbody)
+        body = list(map(self.visit, node.body))
+        finalbody = list(map(self.visit, node.finalbody))
 
         ## Check for exceptions
         if Exceptions not in self.features:
             self.action(node, Exceptions)
 
     def visit_Tuple(self, node):
-        return map(self.visit, node.elts)
+        return list(map(self.visit, node.elts))
 
     def visit_UnaryOp(self, node):
         operand = self.visit(node.operand)
@@ -545,9 +551,9 @@ class PythonVisitor(ast.NodeVisitor):
 
     def visit_While(self, node):
         test = self.visit(node.test)
-        body = map(self.visit, node.body)
+        body = list(map(self.visit, node.body))
         if node.orelse:
-            orelse = map(self.visit, node.orelse)
+            orelse = list(map(self.visit, node.orelse))
 
     def visit_With(self, node):
         ## Check for context managers
@@ -557,7 +563,7 @@ class PythonVisitor(ast.NodeVisitor):
         exp = self.visit(node.context_expr)
         if node.optional_vars:
             var = node.optional_vars and self.visit(node.optional_vars)
-        body = map(self.visit, node.body)
+        body = list(map(self.visit, node.body))
 
     def visit_Yield(self, node):
         ## Check for generators
